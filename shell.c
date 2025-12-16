@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include "shell.h"
 
 /**
 * display_prompt - Prints the shell prompt
@@ -18,9 +19,9 @@ fflush(stdout);
 }
 
 /**
-* read_line - Reads a line from stdin
+* read_line - Reads one line from stdin and strips trailing newline
 *
-* Return: Pointer to the line read, or NULL on EOF
+* Return: Pointer to the allocated line, or NULL on EOF/error
 */
 char *read_line(void)
 {
@@ -33,13 +34,14 @@ if (read == -1)
 free(line);
 return (NULL);
 }
+if (read > 0 && line[read - 1] == '\n')
 line[read - 1] = '\0';
 return (line);
 }
 
 /**
-* execute_command - Executes a command using execve
-* @line: Command to execute
+* execute_command - Forks and executes a one-word command via execve
+* @line: Command (absolute path) to execute, without arguments
 *
 * Return: Nothing
 */
@@ -55,7 +57,11 @@ return;
 }
 if (pid == 0)
 {
-char *argv[2] = {line, NULL};
+char *argv[2];
+
+argv[0] = line;
+argv[1] = NULL;
+
 if (execve(argv[0], argv, environ) == -1)
 {
 perror("./shell");
@@ -63,11 +69,13 @@ exit(EXIT_FAILURE);
 }
 }
 else
+{
 waitpid(pid, &status, 0);
+}
 }
 
 /**
-* main - Entry point of the simple shell
+* main - Entry point for the simple UNIX command line interpreter
 *
 * Return: Always 0
 */

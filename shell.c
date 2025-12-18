@@ -85,10 +85,15 @@ char *line;
 
 while (1)
 {
+/* Show prompt only if interactive */
+if (isatty(STDIN_FILENO))
 display_prompt();
+
 line = read_line();
 if (line == NULL)
 {
+/* Print newline only if interactive */
+if (isatty(STDIN_FILENO))
 printf("\n");
 break;
 }

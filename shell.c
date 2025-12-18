@@ -64,8 +64,47 @@ return (str);
 }
 
 /**
-* execute_command - Forks and executes a one-word command via execve
-* @line: Command (absolute path) to execute, without arguments
+* split_line - Splits a line into tokens separated by spaces/tabs
+* @line: The input line
+*
+* Return: NULL-terminated array of tokens (must be freed)
+*/
+char **split_line(char *line)
+{
+char **tokens = NULL;
+char *token;
+size_t bufsize = 64, i = 0;
+
+tokens = malloc(bufsize * sizeof(char *));
+if (!tokens)
+{
+perror("malloc");
+exit(EXIT_FAILURE);
+}
+
+token = strtok(line, " \t");
+while (token != NULL)
+{
+tokens[i++] = token;
+if (i >= bufsize)
+{
+bufsize += 64;
+tokens = realloc(tokens, bufsize *sizeof(char *));
+if (!tokens)
+{
+perror("realloc");
+exit(EXIT_FAILURE);
+}
+}
+token = strtok(NULL, " \t");
+}
+tokens[i] = NULL;
+return (tokens);
+}
+
+/**
+* execute_command - Forks and executes a command with arguments via execve
+* @line: Command line to execute
 *
 * Return: Nothing
 */
@@ -81,16 +120,15 @@ return;
 }
 if (pid == 0)
 {
-char *argv[2];
-
-argv[0] = line;
-argv[1] = NULL;
+char **argv = split_line(line);
 
 if (execve(argv[0], argv, environ) == -1)
 {
 perror("./shell");
+free(argv);
 exit(EXIT_FAILURE);
 }
+free(argv);
 }
 else
 {

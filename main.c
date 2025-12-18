@@ -1,8 +1,8 @@
+#include "shell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "shell.h"
 
 /**
 * main - Entry point for the simple UNIX command line interpreter

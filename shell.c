@@ -40,6 +40,30 @@ return (line);
 }
 
 /**
+* trim_spaces - Removes leading and trailing spaces/tabs
+* @str: The string to trim
+*
+* Return: Pointer to the trimmed string (same buffer)
+*/
+char *trim_spaces(char *str)
+{
+char *end;
+
+while (*str == ' ' || *str == '\t')
+str++;
+
+if (*str == '\0')
+return (str);
+
+end = str + strlen(str) - 1;
+while (end > str && (*end == ' ' || *end == '\t'))
+end--;
+
+*(end + 1) = '\0';
+return (str);
+}
+
+/**
 * execute_command - Forks and executes a one-word command via execve
 * @line: Command (absolute path) to execute, without arguments
 *
@@ -81,24 +105,25 @@ waitpid(pid, &status, 0);
 */
 int main(void)
 {
-char *line;
+char *line, *cmd;
 
 while (1)
 {
-/* Show prompt only if interactive */
 if (isatty(STDIN_FILENO))
 display_prompt();
 
 line = read_line();
 if (line == NULL)
 {
-/* Print newline only if interactive */
 if (isatty(STDIN_FILENO))
 printf("\n");
 break;
 }
-if (strlen(line) > 0)
-execute_command(line);
+
+cmd = trim_spaces(line);
+if (cmd[0] != '\0')   /* ignore empty or spaces-only lines */
+execute_command(cmd);
+
 free(line);
 }
 return (0);

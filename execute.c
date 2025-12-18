@@ -1,9 +1,9 @@
+#include "shell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include "shell.h"
 
 /**
 * execute_command - Forks and executes a command with arguments via execve

@@ -8,6 +8,6 @@ char *read_line(void);
 void execute_command(char *line);
 char *trim_spaces(char *str);
 char **split_line(char *line);
+char *get_path(void);
 char *find_command(char *command);
-void execute_command(char *line);
 #endif

@@ -31,7 +31,8 @@ return (NULL);
 /**
 * find_command - Search for a command in PATH
 * @command: The command name
-** Return: Full path if found (malloc'd), NULL if not
+*
+* Return: Full path if found (malloc'd), NULL if not
 */
 char *find_command(char *command)
 {
@@ -40,7 +41,10 @@ size_t len;
 
 path = get_path();
 if (!path || *path == '\0')
+{
+free(path); /* free if empty or NULL to avoid leak */
 return (NULL);
+}
 
 dir = strtok(path, ":");
 while (dir != NULL)
@@ -74,7 +78,7 @@ return (NULL);
 void execute_command(char *line)
 {
 char **argv = split_line(line);
-char *cmd_path;
+char *cmd_path = NULL;
 pid_t pid;
 int status;
 
@@ -84,7 +88,7 @@ free(argv);
 return;
 }
 
-/* PATH lookup */
+/* Determine command path: direct (contains '/') or via PATH lookup */
 if (strchr(argv[0], '/'))
 cmd_path = strdup(argv[0]);
 else
@@ -92,10 +96,11 @@ cmd_path = find_command(argv[0]);
 
 if (!cmd_path)
 {
-/* Print error in checker format and exit with 127 */
+/* Required error format and exit status when command not found */
 fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
 free(argv);
-exit(127); /* no fork, exit with 127 */
+/* No fork must be performed when command doesn't exist */
+exit(127);
 }
 
 pid = fork();
@@ -108,7 +113,7 @@ return;
 }
 if (pid == 0)
 {
-/* Pass full argv (with arguments) */
+/* Child: execute command with full argv */
 if (execve(cmd_path, argv, environ) == -1)
 {
 perror("./hsh");
@@ -119,8 +124,10 @@ exit(EXIT_FAILURE);
 }
 else
 {
+/* Parent: wait for child */
 waitpid(pid, &status, 0);
 }
+
 free(argv);
 free(cmd_path);
 }

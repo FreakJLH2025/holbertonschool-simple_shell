@@ -10,4 +10,5 @@ char *trim_spaces(char *str);
 char **split_line(char *line);
 char *get_path(void);
 char *find_command(char *command);
+int execute_command(char *line);
 #endif

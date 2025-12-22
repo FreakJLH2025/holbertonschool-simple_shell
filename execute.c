@@ -31,8 +31,7 @@ return (NULL);
 /**
 * find_command - Search for a command in PATH
 * @command: The command name
-*
-* Return: Full path if found (malloc'd), NULL if not
+** Return: Full path if found (malloc'd), NULL if not
 */
 char *find_command(char *command)
 {
@@ -40,7 +39,7 @@ char *path, *dir, *full_path;
 size_t len;
 
 path = get_path();
-if (!path)
+if (!path || *path == '\0')
 return (NULL);
 
 dir = strtok(path, ":");
@@ -96,7 +95,7 @@ if (!cmd_path)
 /* Print error in checker format and exit with 127 */
 fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
 free(argv);
-exit(127);
+exit(127); /* no fork, exit with 127 */
 }
 
 pid = fork();

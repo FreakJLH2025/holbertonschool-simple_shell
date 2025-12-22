@@ -93,9 +93,10 @@ cmd_path = find_command(argv[0]);
 
 if (!cmd_path)
 {
-fprintf(stderr, "./shell: command not found: %s\n", argv[0]);
+/* Print error in checker format and exit with 127 */
+fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
 free(argv);
-return; /* no fork */
+exit(127);
 }
 
 pid = fork();
@@ -111,7 +112,7 @@ if (pid == 0)
 /* Pass full argv (with arguments) */
 if (execve(cmd_path, argv, environ) == -1)
 {
-perror("./shell");
+perror("./hsh");
 free(argv);
 free(cmd_path);
 exit(EXIT_FAILURE);

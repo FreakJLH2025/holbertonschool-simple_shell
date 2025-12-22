@@ -1,9 +1,49 @@
-#include "shell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "shell.h"
+
+/**
+* find_command - Search for a command in PATH
+* @command: The command name
+*
+* Return: Full path if found (malloc'd), NULL if not
+*/
+char *find_command(char *command)
+{
+char *path, *dir, *full_path;
+size_t len;
+
+path = getenv("PATH");
+if (!path)
+return (NULL);
+
+path = strdup(path);
+dir = strtok(path, ":");
+while (dir != NULL)
+{
+len = strlen(dir) + strlen(command) + 2;
+full_path = malloc(len);
+if (!full_path)
+{
+free(path);
+return (NULL);
+}
+snprintf(full_path, len, "%s/%s", dir, command);
+if (access(full_path, X_OK) == 0)
+{
+free(path);
+return (full_path); /* caller must free */
+}
+free(full_path);
+dir = strtok(NULL, ":");
+}
+free(path);
+return (NULL);
+}
 
 /**
 * execute_command - Forks and executes a command with arguments via execve
@@ -13,28 +53,52 @@
 */
 void execute_command(char *line)
 {
-pid_t pid = fork();
+char **argv = split_line(line);
+char *cmd_path;
+pid_t pid;
 int status;
 
+if (!argv || !argv[0])
+{
+free(argv);
+return;
+}
+
+/* Check if command has '/' or needs PATH lookup */
+if (strchr(argv[0], '/'))
+cmd_path = strdup(argv[0]);
+else
+cmd_path = find_command(argv[0]);
+
+if (!cmd_path)
+{
+fprintf(stderr, "./shell: command not found: %s\n", argv[0]);
+free(argv);
+return; /* no fork */
+}
+
+pid = fork();
 if (pid == -1)
 {
 perror("fork");
+free(argv);
+free(cmd_path);
 return;
 }
 if (pid == 0)
 {
-char **argv = split_line(line);
-
-if (execve(argv[0], argv, environ) == -1)
+if (execve(cmd_path, argv, environ) == -1)
 {
 perror("./shell");
 free(argv);
+free(cmd_path);
 exit(EXIT_FAILURE);
 }
-free(argv);
 }
 else
 {
 waitpid(pid, &status, 0);
 }
+free(argv);
+free(cmd_path);
 }

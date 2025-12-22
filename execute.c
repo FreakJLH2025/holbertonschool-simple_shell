@@ -70,22 +70,22 @@ return (NULL);
 }
 
 /**
-* execute_command - Forks and executes a command with arguments via execve
+* execute_command - Executes a command line. No fork if command not found.
 * @line: Command line to execute
 *
-* Return: Nothing
+* Return: exit status for the command (127 if not found, child status otherwise)
 */
-void execute_command(char *line)
+int execute_command(char *line)
 {
 char **argv = split_line(line);
 char *cmd_path = NULL;
 pid_t pid;
-int status;
+int status = 0;
 
 if (!argv || !argv[0])
 {
 free(argv);
-return;
+return (0);
 }
 
 /* Determine command path: direct (contains '/') or via PATH lookup */
@@ -96,11 +96,10 @@ cmd_path = find_command(argv[0]);
 
 if (!cmd_path)
 {
-/* Required error format and exit status when command not found */
+/* Required error format and status when command not found */
 fprintf(stderr, "./hsh: 1: %s: not found\n", argv[0]);
 free(argv);
-/* No fork must be performed when command doesn't exist */
-exit(127);
+return (127); /* no fork, return 127 to caller */
 }
 
 pid = fork();
@@ -109,8 +108,9 @@ if (pid == -1)
 perror("fork");
 free(argv);
 free(cmd_path);
-return;
+return (1);
 }
+
 if (pid == 0)
 {
 /* Child: execute command with full argv */
@@ -124,10 +124,16 @@ exit(EXIT_FAILURE);
 }
 else
 {
-/* Parent: wait for child */
-waitpid(pid, &status, 0);
+/* Parent: wait for child and propagate its exit status */
+if (waitpid(pid, &status, 0) == -1)
+status = 1;
+else if (WIFEXITED(status))
+status = WEXITSTATUS(status);
+else
+status = 1;
 }
 
 free(argv);
 free(cmd_path);
+return (status);
 }

@@ -1,17 +1,17 @@
-#include "shell.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+#include "shell.h"
 
 /**
-* main - Entry point for the simple UNIX command line interpreter
+* main - Entry point for the shell
 *
-* Return: Always 0
+* Return: exit status of last executed command
 */
 int main(void)
 {
 char *line, *cmd;
+int last_status = 0;
 
 while (1)
 {
@@ -27,10 +27,11 @@ break;
 }
 
 cmd = trim_spaces(line);
-if (cmd[0] != '\0')   /* ignore empty or spaces-only lines */
-execute_command(cmd);
+if (cmd[0] != '\0')
+last_status = execute_command(cmd);
 
 free(line);
 }
-return (0);
+
+return (last_status);
 }

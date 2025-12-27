@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "shell.h"
+#include <string.h>
 
 /**
 * main - Entry point for the shell

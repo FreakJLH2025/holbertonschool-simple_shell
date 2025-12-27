@@ -27,6 +27,14 @@ break;
 }
 
 cmd = trim_spaces(line);
+
+/* Built-in exit */
+if (strcmp(cmd, "exit") == 0)
+{
+free(line);
+exit(last_status); /* exit shell with last status */
+}
+
 if (cmd[0] != '\0')
 last_status = execute_command(cmd);
 

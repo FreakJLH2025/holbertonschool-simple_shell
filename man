@@ -1,0 +1,78 @@
+.TH hsh 1 "January 2026" "Simple Shell" "User Commands"
+.SH NAME
+hsh \- simple UNIX command line interpreter
+.SH SYNOPSIS
+.B hsh
+.br
+.B hsh
+< file
+.SH DESCRIPTION
+The
+.B hsh
+program is a simple UNIX command line interpreter developed as part of the Holberton School project.
+
+It provides a minimal environment to execute commands, search for executables in the PATH, and handle basic built-in commands.
+
+.SH FEATURES
+The shell implements the following features:
+.IP \(bu
+Display a prompt when running in interactive mode.
+.IP \(bu
+Read and parse command lines.
+.IP \(bu
+Execute commands found in the PATH or specified with an absolute/relative path.
+.IP \(bu
+Handle errors when commands are not found (exit status 127).
+.IP \(bu
+Built-in commands:
+.RS
+.IP exit
+Exit the shell with the status of the last executed command.
+.IP env
+Print the current environment variables.
+.RE
+
+.SH USAGE
+.TP
+Interactive mode:
+.RS
+Run
+.B ./hsh
+and type commands at the prompt.
+.RE
+.TP
+Non-interactive mode:
+.RS
+Pipe or redirect commands into
+.B ./hsh
+for batch execution.
+.RE
+
+.SH EXAMPLES
+.TP
+Run the shell interactively:
+.RS
+.B ./hsh
+.RE
+.TP
+Execute commands from a file:
+.RS
+.B ./hsh
+< script.sh
+.RE
+.TP
+Print environment variables:
+.RS
+.B env
+.RE
+.TP
+Exit the shell:
+.RS
+.B exit
+.RE
+
+.SH RETURN VALUE
+The shell returns the exit status of the last executed command. If a command is not found, the shell exits with status 127.
+
+.SH AUTHOR
+Written by Joshua as part of the Holberton School simple shell project.
